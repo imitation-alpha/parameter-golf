@@ -1,0 +1,58 @@
+{
+  "name": "parameter_golf_syntax_smoke",
+  "problem_statement": "Verify that the autonomous search loop can branch from the current ternary experiment file, materialize isolated workspaces, evaluate candidates, reflect, and update archives without needing a live LLM API or a long GPU run.",
+  "workspace": {
+    "source_root": "../..",
+    "editable_paths": [
+      "records/track_non_record_16mb/2026-03-23_Ternary_QAT_vs_Int5/train_gpt.py"
+    ],
+    "campaign_dir": "../../solution_search_runs/parameter_golf_syntax_smoke",
+    "keep_workspaces": false,
+    "preflight_py_compile": true
+  },
+  "evaluation": {
+    "cwd": "records/track_non_record_16mb/2026-03-23_Ternary_QAT_vs_Int5",
+    "command": "python3 -m py_compile train_gpt.py",
+    "timeout_seconds": 60,
+    "default_env": {
+      "RUN_ID": "{candidate_id}"
+    },
+    "metric_patterns": []
+  },
+  "objective": {
+    "primary_metric": "runtime_seconds",
+    "direction": "min",
+    "constraints": [
+      {
+        "metric": "returncode",
+        "op": "==",
+        "value": 0,
+        "penalty": 1000000,
+        "hard": true
+      }
+    ],
+    "improvement_epsilon": 0.0
+  },
+  "llm": {
+    "provider": "stub",
+    "api_key_env": "LLM_API_KEY",
+    "model": "stub"
+  },
+  "search": {
+    "iterations": 2,
+    "evaluate_baseline": true,
+    "top_context_candidates": 2,
+    "recent_failures": 2,
+    "strategy_samples": 2,
+    "recent_lessons": 3,
+    "max_file_context_chars": 30000,
+    "random_seed": 0,
+    "branch_factor": 2,
+    "parent_pool_size": 1,
+    "exploration_weight": 1.0,
+    "refresh_knowledge_on_start": false
+  },
+  "knowledge_sources": [],
+  "seed_strategies_path": "../seeds/parameter_golf_strategies.json",
+  "seed_mistakes_path": "../seeds/parameter_golf_mistakes.json"
+}

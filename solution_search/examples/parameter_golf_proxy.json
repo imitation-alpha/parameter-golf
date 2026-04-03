@@ -1,0 +1,160 @@
+{
+  "name": "parameter_golf_proxy",
+  "problem_statement": "Search for improved Parameter Golf candidates under the 16,000,000 byte artifact limit using the existing FineWeb-based proxy workflow. Focus on the current ternary experiment branch in records/track_non_record_16mb/2026-03-23_Ternary_QAT_vs_Int5/train_gpt.py. Optimize final post-quant val_bpb while satisfying bytes_total <= 16000000. Preserve runnable code and avoid repeating known local failures such as naive recurrence, full-ternary-all-layers degradation, and late-layer ternary collapse.",
+  "workspace": {
+    "source_root": "../..",
+    "editable_paths": [
+      "records/track_non_record_16mb/2026-03-23_Ternary_QAT_vs_Int5/train_gpt.py"
+    ],
+    "campaign_dir": "../../solution_search_runs/parameter_golf_proxy",
+    "keep_workspaces": false,
+    "preflight_py_compile": true
+  },
+  "evaluation": {
+    "cwd": "records/track_non_record_16mb/2026-03-23_Ternary_QAT_vs_Int5",
+    "command": "python3 train_gpt.py",
+    "timeout_seconds": 1200,
+    "default_env": {
+      "DATA_PATH": "/home/alpha/dev/research/competition/parameter-golf/data/datasets/fineweb10B_sp1024_proxy",
+      "TOKENIZER_PATH": "/home/alpha/dev/research/competition/parameter-golf/data/tokenizers/fineweb_1024_bpe.model",
+      "RUN_ID": "{candidate_id}",
+      "QUANT_MODE": "mixed",
+      "SEED": "42",
+      "NUM_LAYERS": "11",
+      "MODEL_DIM": "640",
+      "NUM_HEADS": "8",
+      "NUM_KV_HEADS": "4",
+      "MLP_MULT": "3",
+      "COMPUTE_DTYPE": "fp32",
+      "USE_TORCH_COMPILE": "0",
+      "USE_FUSED_OPTIM": "0",
+      "ITERATIONS": "600",
+      "WARMUP_STEPS": "0",
+      "MAX_WALLCLOCK_SECONDS": "0",
+      "VAL_LOSS_EVERY": "0",
+      "TRAIN_LOG_EVERY": "50",
+      "SPARSITY_LOG_EVERY": "100",
+      "TRAIN_BATCH_TOKENS": "4096",
+      "TRAIN_SEQ_LEN": "256",
+      "VAL_BATCH_SIZE": "8192",
+      "EVAL_STRIDE": "0",
+      "EVAL_BATCH_SEQS": "4",
+      "MATRIX_LR": "0.0005",
+      "SCALAR_LR": "0.001",
+      "TIED_EMBED_LR": "0.003",
+      "HEAD_LR": "0.001",
+      "WEIGHT_DECAY": "0.0",
+      "MUON_MOMENTUM": "0.95",
+      "GRAD_CLIP_NORM": "0.1"
+    },
+    "metric_patterns": [
+      {
+        "regex": "step:600/600 val_loss:(?P<pre_quant_val_loss>[0-9.]+) val_bpb:(?P<pre_quant_val_bpb>[0-9.]+)"
+      },
+      {
+        "regex": "Total submission size [^:]*: (?P<bytes_total>\\d+) bytes"
+      },
+      {
+        "regex": "final_quant_roundtrip_exact mode:[^\\s]+ val_loss:(?P<val_loss>[0-9.]+) val_bpb:(?P<val_bpb>[0-9.]+)"
+      }
+    ]
+  },
+  "objective": {
+    "primary_metric": "val_bpb",
+    "direction": "min",
+    "constraints": [
+      {
+        "metric": "returncode",
+        "op": "==",
+        "value": 0,
+        "penalty": 10000000,
+        "hard": true
+      },
+      {
+        "metric": "bytes_total",
+        "op": "<=",
+        "value": 16000000,
+        "penalty": 1000000,
+        "hard": true
+      }
+    ],
+    "improvement_epsilon": 1e-06
+  },
+  "llm": {
+    "provider": "openai_compatible",
+    "api_base": "https://api.openai.com/v1",
+    "api_key_env": "LLM_API_KEY",
+    "model": "REPLACE_WITH_MODEL",
+    "temperature": 0.7,
+    "max_tokens": 4000,
+    "timeout_seconds": 120
+  },
+  "search": {
+    "iterations": 5,
+    "evaluate_baseline": true,
+    "top_context_candidates": 3,
+    "recent_failures": 4,
+    "strategy_samples": 4,
+    "recent_lessons": 6,
+    "max_file_context_chars": 90000,
+    "random_seed": 0,
+    "branch_factor": 3,
+    "parent_pool_size": 2,
+    "exploration_weight": 1.2,
+    "refresh_knowledge_on_start": true
+  },
+  "knowledge_sources": [
+    {
+      "id": "parameter-golf-leaderboard",
+      "kind": "url",
+      "url": "https://raw.githubusercontent.com/openai/parameter-golf/main/README.md",
+      "max_chars": 45000,
+      "refresh_seconds": 21600
+    },
+    {
+      "id": "parameter-golf-top-record-readmes",
+      "kind": "github_markdown_linked_readmes",
+      "url": "https://raw.githubusercontent.com/openai/parameter-golf/main/README.md",
+      "path": "records/track_10min_16mb/",
+      "max_results": 6,
+      "max_chars": 30000,
+      "refresh_seconds": 86400
+    },
+    {
+      "id": "autoresearch-readme",
+      "kind": "github_readme",
+      "repo": "karpathy/autoresearch",
+      "max_chars": 20000,
+      "refresh_seconds": 604800
+    },
+    {
+      "id": "ai-scientist-v2-readme",
+      "kind": "github_readme",
+      "repo": "sakanaai/ai-scientist-v2",
+      "max_chars": 25000,
+      "refresh_seconds": 604800
+    },
+    {
+      "id": "openevolve-readme",
+      "kind": "github_readme",
+      "repo": "algorithmicsuperintelligence/openevolve",
+      "max_chars": 25000,
+      "refresh_seconds": 604800
+    },
+    {
+      "id": "bitnet-arxiv-search",
+      "kind": "arxiv_search",
+      "query": "all:BitNet OR all:ternary quantization aware training transformer",
+      "max_results": 3,
+      "max_chars": 20000,
+      "refresh_seconds": 604800
+    }
+  ],
+  "seed_strategies_path": "../seeds/parameter_golf_strategies.json",
+  "seed_mistakes_path": "../seeds/parameter_golf_mistakes.json",
+  "source_notes": [
+    "Local best branch: larger mixed ternary almost matches matched-shape int5 baseline on the proxy split while staying under 16MB.",
+    "Proxy score is not an official challenge score; use it only for search and ranking.",
+    "Use the public leaderboard and external research repos as priors, but do not blindly imitate their solutions."
+  ]
+}

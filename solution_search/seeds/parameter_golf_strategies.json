@@ -1,0 +1,63 @@
+[
+  {
+    "id": "scale-mixed-ternary",
+    "title": "Scale mixed ternary with saved bytes",
+    "description": "Use ternary only where compression buys capacity without destroying quality, then spend saved bytes on a larger model.",
+    "when_to_try": "When mixed ternary is close to an int5 baseline but still comfortably under the 16MB cap.",
+    "avoid_when": "When same-shape mixed ternary is already clearly worse and byte savings are too small to fund a meaningful scale-up.",
+    "tags": ["architecture", "capacity", "mixed-ternary"],
+    "successes": 2,
+    "failures": 0
+  },
+  {
+    "id": "protect-attention-precision",
+    "title": "Keep attention higher precision",
+    "description": "Apply aggressive quantization mainly in the MLP path while keeping attention in a less lossy regime.",
+    "when_to_try": "When full ternary hurts quality but mixed ternary remains competitive.",
+    "avoid_when": "When attention is not the quality bottleneck or the artifact is already dominated by embeddings/output layers.",
+    "tags": ["quantization", "attention"],
+    "successes": 2,
+    "failures": 0
+  },
+  {
+    "id": "tune-ste-learning-rate",
+    "title": "Reduce STE learning-rate aggression",
+    "description": "Ternary and low-bit STE training may need lower matrix learning rates and clipping to avoid instability or collapse.",
+    "when_to_try": "When loss spikes or sparsity saturates early.",
+    "avoid_when": "When the current run is stable and underfitting due to too little movement.",
+    "tags": ["optimization", "ste"],
+    "successes": 1,
+    "failures": 0
+  },
+  {
+    "id": "monitor-zero-fraction",
+    "title": "Treat zero-fraction as a first-class signal",
+    "description": "Track per-layer zero-fraction and use it to catch collapse or layer-specific dead zones before wasting a full run.",
+    "when_to_try": "Any time ternary or structured sparsity is used.",
+    "avoid_when": "Never; this is a diagnostic, not a costly architecture choice.",
+    "tags": ["diagnostics", "sparsity"],
+    "successes": 3,
+    "failures": 0
+  },
+  {
+    "id": "vary-bigram-capacity",
+    "title": "Rebalance bigram hash capacity",
+    "description": "Treat BigramHash size and dimensionality as a budget knob that can interact strongly with model size and compression choices.",
+    "when_to_try": "When the transformer body is near a quality plateau but bytes remain.",
+    "avoid_when": "When the body architecture is still unstable or clearly undertrained.",
+    "tags": ["features", "bigram"],
+    "successes": 0,
+    "failures": 0
+  },
+  {
+    "id": "sweep-eval-friendly-architecture",
+    "title": "Prefer evaluation-friendly changes late",
+    "description": "Near a good solution, prioritize changes that preserve fast, deterministic eval and compressed roundtrip behavior.",
+    "when_to_try": "When model quality is close and the next gains should not jeopardize artifact or eval constraints.",
+    "avoid_when": "During very early exploration when large architectural leaps still make sense.",
+    "tags": ["evaluation", "submission"],
+    "successes": 0,
+    "failures": 0
+  }
+]
+

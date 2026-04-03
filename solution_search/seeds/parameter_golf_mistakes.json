@@ -1,0 +1,38 @@
+[
+  {
+    "id": "full-ternary-all-layers-loses-quality",
+    "title": "Full ternary all-layers lost quality on proxy",
+    "description": "Local proxy runs showed that ternarizing all layers compressed extremely well but degraded quality relative to mixed ternary and int5 baselines.",
+    "avoidance": "Do not default to full ternary as the main branch unless a new mechanism specifically addresses its quality loss.",
+    "count": 1
+  },
+  {
+    "id": "deep-full-ternary-got-worse",
+    "title": "Making full ternary deeper got worse",
+    "description": "A deeper 14-layer full-ternary proxy branch was clearly worse than the smaller mixed/int5 comparisons.",
+    "avoidance": "Do not assume more effective depth rescues lossy quantization; verify with a matched comparison first.",
+    "count": 1
+  },
+  {
+    "id": "naive-layer-recurrence-hurt",
+    "title": "Naive layer recurrence already looked bad",
+    "description": "A prior non-record recurrence run in this repo reported the worst result in its ablation set after doubling depth by reusing weights.",
+    "avoidance": "Avoid naive recurrence without per-loop specialization and equal-wallclock evaluation.",
+    "count": 1
+  },
+  {
+    "id": "last-mlp-proj-saturates",
+    "title": "Last mixed MLP projection can saturate to all-zero",
+    "description": "Mixed ternary proxy runs repeatedly showed the worst layer at zero-fraction 1.000 in the final MLP projection block.",
+    "avoidance": "Inspect late-layer projection behavior before scaling up or repeating the same training settings.",
+    "count": 2
+  },
+  {
+    "id": "proxy-is-not-official-score",
+    "title": "Proxy improvements are not official leaderboard results",
+    "description": "FineWeb-based proxy runs are useful for search, but they are not the official challenge evaluation and may not preserve exact ranking.",
+    "avoidance": "Do not treat proxy deltas as sufficient evidence for leaderboard claims.",
+    "count": 1
+  }
+]
+
